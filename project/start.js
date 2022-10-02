@@ -6,6 +6,7 @@ const height = canvas.clientHeight;
 
 let foodAvailable = false;
 const pixels = 20;
+let speed = 1;
 
 const apple = {
     x: 0,
@@ -48,8 +49,7 @@ function generateSnakePositions(){
 }
 
 const snake = {
-    pixel: 20,
-    speed: 1,
+    //speed: 1,
     snakePosition: generateSnakePositions(),
     score: 0,
     view: 0, //0 west, 1 north, 2 east, 3 south
@@ -61,10 +61,10 @@ const snake = {
     draw(ctx) {
         ctx.fillStyle = 'lime';
         for (let i = 0; i < this.snakePosition.length; i++) {
-            if(i==20){
+            if(i==pixels){
                 ctx.fillStyle = 'aquamarine';
             }
-            ctx.fillRect(this.snakePosition[i][0], this.snakePosition[i][1], this.pixel, this.pixel);
+            ctx.fillRect(this.snakePosition[i][0], this.snakePosition[i][1], pixels, pixels);
         }
 
     },
@@ -79,28 +79,28 @@ const snake = {
                 if(this.snakePosition[0][0] <= 0){
                     this.snakePosition.unshift([width,this.snakePosition[0][1]]);
                 } else{
-                    this.snakePosition.unshift([this.snakePosition[0][0] - this.speed,this.snakePosition[0][1]]);
+                    this.snakePosition.unshift([this.snakePosition[0][0] - speed,this.snakePosition[0][1]]);
                 }
                 break;
             case 1: // up
                 if(this.snakePosition[0][1] <= 0){
                     this.snakePosition.unshift([this.snakePosition[0][0],height]);
                 } else{
-                    this.snakePosition.unshift([this.snakePosition[0][0], this.snakePosition[0][1] - this.speed]);
+                    this.snakePosition.unshift([this.snakePosition[0][0], this.snakePosition[0][1] - speed]);
                 }  
                 break;
             case 2: //right
                 if(this.snakePosition[0][0] >= width){
                     this.snakePosition.unshift([0,this.snakePosition[0][1]]);
                 } else{
-                this.snakePosition.unshift([this.snakePosition[0][0] + this.speed, this.snakePosition[0][1]]);
+                this.snakePosition.unshift([this.snakePosition[0][0] + speed, this.snakePosition[0][1]]);
                 }
                 break;
             default: //down
                 if(this.snakePosition[0][1] >= height){
                     this.snakePosition.unshift([this.snakePosition[0][0],0]);
                 } else{
-                    this.snakePosition.unshift([this.snakePosition[0][0],this.snakePosition[0][1] + this.speed]);
+                    this.snakePosition.unshift([this.snakePosition[0][0],this.snakePosition[0][1] + speed]);
                 }  
                 break;
         }
@@ -135,19 +135,19 @@ const snake = {
         let yDifference = lastPosition[1] - beforeLastPosition[1]; // >0:up   <0:down   ==0: keine Veränderung der y Position, also right or left
         
         if(yDifference>0){ // Bewegung geht nach up
-            for (let index = 1; index <= 20; index++) {
+            for (let index = 1; index <= pixels; index++) {
                 this.snakePosition.push([this.snakePosition[lastIndex][0], this.snakePosition[lastIndex][1]+index]);
             }
         } else if (yDifference < 0){ // Bewegung geht nach down
-                    for (let index = 1; index <= 20; index++) {
+                    for (let index = 1; index <= pixels; index++) {
                         this.snakePosition.push([this.snakePosition[lastIndex][0], this.snakePosition[lastIndex][1]-index]);
                     }
                 } else if (xDifference>0){
-                    for (let index = 1; index <= 20; index++) {
+                    for (let index = 1; index <= pixels; index++) {
                         this.snakePosition.push([this.snakePosition[lastIndex][0]+index, this.snakePosition[lastIndex][1]]);
                     }
                 } else{
-                    for (let index = 1; index <= 20; index++) {
+                    for (let index = 1; index <= pixels; index++) {
                         this.snakePosition.push([this.snakePosition[lastIndex][0]-index, this.snakePosition[lastIndex][1]]);
                     }
                 }
@@ -166,13 +166,13 @@ function checkCollisionFood(){
     let xSnake = snake.snakePosition[0][0];
     let ySnake = snake.snakePosition[0][1];
     let distance = Math.sqrt(Math.pow(Math.abs(xApple-xSnake),2) + Math.pow(Math.abs(yApple-ySnake),2) );
-    if(distance <= 20){
-    // wenn ja: score auf Snake addieren
-    snake.score += apple.score;
-    // und Apfel verschwinden lassen
-    foodAvailable = false;
-    // und Snake wachsen lassen
-    snake.grow();
+    if(distance <= pixels){
+        // wenn ja: score auf Snake addieren
+        snake.score += apple.score;
+        // und Apfel verschwinden lassen
+        foodAvailable = false;
+        // und Snake wachsen lassen
+        snake.grow();
     }
     
 }
@@ -188,7 +188,6 @@ function checkCollisionSnakeBody(){
 function collisionDetectionRectangles(startIndex, x1,y1){
     let x;
     let y;
-    //let distance;
     for (let index = startIndex; index < snake.snakePosition.length; index++) {
         x = snake.snakePosition[index][0];
         y = snake.snakePosition[index][1];
