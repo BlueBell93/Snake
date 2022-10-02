@@ -133,27 +133,24 @@ const snake = {
         let beforeLastPosition = this.snakePosition[lastIndex-1];
         let xDifference = lastPosition[0] - beforeLastPosition[0]; // >0:left   <0:right   ==0:keine Veränderung der x Position; up oder down 
         let yDifference = lastPosition[1] - beforeLastPosition[1]; // >0:up   <0:down   ==0: keine Veränderung der y Position, also right or left
-        if(xDifference == 0){ // up or down
-            if(yDifference>0){ // Bewegung geht nach up
-                for (let index = 1; index <= 20; index++) {
-                    this.snakePosition.push([this.snakePosition[lastIndex][0], this.snakePosition[lastIndex][1]+index]);
-                }
-            } else { // Bewegung geht nach down
-                for (let index = 1; index <= 20; index++) {
-                    this.snakePosition.push([this.snakePosition[lastIndex][0], this.snakePosition[lastIndex][1]-index]);
-                }
+        
+        if(yDifference>0){ // Bewegung geht nach up
+            for (let index = 1; index <= 20; index++) {
+                this.snakePosition.push([this.snakePosition[lastIndex][0], this.snakePosition[lastIndex][1]+index]);
             }
-        } else{ //left or right
-            if(xDifference>0){ // Bewegung geht nach left
-                for (let index = 1; index <= 20; index++) {
-                    this.snakePosition.push([this.snakePosition[lastIndex][0]+index, this.snakePosition[lastIndex][1]]);
+        } else if (yDifference < 0){ // Bewegung geht nach down
+                    for (let index = 1; index <= 20; index++) {
+                        this.snakePosition.push([this.snakePosition[lastIndex][0], this.snakePosition[lastIndex][1]-index]);
+                    }
+                } else if (xDifference>0){
+                    for (let index = 1; index <= 20; index++) {
+                        this.snakePosition.push([this.snakePosition[lastIndex][0]+index, this.snakePosition[lastIndex][1]]);
+                    }
+                } else{
+                    for (let index = 1; index <= 20; index++) {
+                        this.snakePosition.push([this.snakePosition[lastIndex][0]-index, this.snakePosition[lastIndex][1]]);
+                    }
                 }
-            }else { // Bewegung geht nach right
-                for (let index = 1; index <= 20; index++) {
-                    this.snakePosition.push([this.snakePosition[lastIndex][0]-index, this.snakePosition[lastIndex][1]]);
-                }
-            }
-        }
     }
 
 };
