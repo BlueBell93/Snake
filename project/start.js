@@ -20,27 +20,7 @@ const apple = {
         while(collision){
             this.x = Math.random() * 780;//width
             this.y = Math.random() * 380 ;//height
-            let xSnake;
-            let ySnake;
-            
-            //let distance;
-            for (let index = 0; index < snake.snakePosition.length; index++) {
-                xSnake = snake.snakePosition[index][0];
-                ySnake = snake.snakePosition[index][1];
-                if(this.x < xSnake + 1){
-                    if(this.x + 1 > xSnake){
-                        if(this.y < ySnake + 20){
-                            if(this.y + 20 > ySnake){
-                                collision = true;
-                                return;
-                            } 
-                        }
-                    }
-                
-                }
-                collision = false;
-    
-            }
+            collision = collisionDetectionRectangles(pixels, this.x,this.y);
         }
     },
     /**
@@ -54,6 +34,11 @@ const apple = {
     }
 }
 
+/**
+ * Initializes the starting positions of the snake
+ * 
+ * @returns snakePos an array of positions of the snake
+ */
 function generateSnakePositions(){
     let snakePos = [];
     for (let index = 0; index < 6*pixels; index++) {
@@ -68,7 +53,11 @@ const snake = {
     snakePosition: generateSnakePositions(),
     score: 0,
     view: 0, //0 west, 1 north, 2 east, 3 south
-
+    /**
+     * Draws the snake. The head of the snake is highlighted by another color.
+     * 
+     * @param {*} ctx 
+     */
     draw(ctx) {
         ctx.fillStyle = 'lime';
         for (let i = 0; i < this.snakePosition.length; i++) {
@@ -110,72 +99,12 @@ const snake = {
             default: //down
                 if(this.snakePosition[0][1] >= height){
                     this.snakePosition.unshift([this.snakePosition[0][0],0]);
-                    //this.snakePosition[i][1] = 0;
                 } else{
                     this.snakePosition.unshift([this.snakePosition[0][0],this.snakePosition[0][1] + this.speed]);
-                    //this.snakePosition[i][1] = this.snakePosition[i][1] + this.speed;
                 }  
                 break;
         }
     },
-    
-   /*
-    update(){
-        //letztes Element löschen
-        this.snakePosition.pop();
-        //erstes Element abhängig von der view hinzufügen
-        switch (this.view) {
-            case 0: //left - west
-                if(this.snakePosition[0][0] <= 0){
-                    this.snakePosition.unshift([width,this.snakePosition[0][1]]);
-                    //this.snakePosition[i][0] = width;
-                } else{
-                    this.snakePosition.unshift([this.snakePosition[0][0] - this.pixel,this.snakePosition[0][1]]);
-                    //this.snakePosition[i][0] = this.snakePosition[i][0] - this.speed;
-                }
-                for (let i = 0; i < this.snakePosition.length; i++) {
-                    this.snakePosition[i][0] = this.snakePosition[i][0] + this.pixel - this.speed; 
-                }
-                break;
-            case 1: //up - north
-                if(this.snakePosition[0][1] <= 0){
-                    this.snakePosition.unshift([this.snakePosition[0][0],height]);
-                    //this.snakePosition[i][1] = height;
-                } else{
-                    this.snakePosition.unshift([this.snakePosition[0][0], this.snakePosition[0][1] - this.pixel]);
-                    //this.snakePosition[i][1] = this.snakePosition[i][1] - this.speed;
-                }   
-                for (let i = 0; i < this.snakePosition.length; i++) {
-                    this.snakePosition[i][1] = this.snakePosition[i][1] + this.pixel - this.speed; 
-                }
-                break;
-            case 2: //right - east
-                if(this.snakePosition[0][0] >= width){
-                    this.snakePosition.unshift([0,this.snakePosition[0][1]]);
-                    //this.snakePosition[i][0] = 0;
-                } else{
-                    this.snakePosition.unshift([this.snakePosition[0][0] + this.pixel, this.snakePosition[0][1]]);
-                    //this.snakePosition[i][0] = this.snakePosition[i][0] + this.speed;
-                }
-                for (let i = 0; i < this.snakePosition.length; i++) {
-                    this.snakePosition[i][0] = this.snakePosition[i][0] - this.pixel + this.speed; 
-                }
-                break;
-            default: //down - south
-                if(this.snakePosition[0][1] >= height){
-                    this.snakePosition.unshift([this.snakePosition[0][0],0]);
-                    //this.snakePosition[i][1] = 0;
-                } else{
-                    this.snakePosition.unshift([this.snakePosition[0][0],this.snakePosition[0][1] + this.pixel]);
-                    //this.snakePosition[i][1] = this.snakePosition[i][1] + this.speed;
-                }  
-                for (let i = 0; i < this.snakePosition.length; i++) {
-                    this.snakePosition[i][1] = this.snakePosition[i][1] - this.pixel + this.speed; 
-                }
-                break;
-        }
-    },
-    */
     move(event){
         switch (event.keyCode) {
             case 37: //left
@@ -225,26 +154,13 @@ const snake = {
                 }
             }
         }
-        switch (this.view) {
-            case 0:
-                
-                break;
-            case 1:
-                
-                break;
-            case 2:
-                
-                break;    
-            default:
-                break;
-        }
-        
     }
 
 };
 
 /**
- * Detects a collision between the snake and the food like apple
+ * Detects a collision between the snake and apple. If the snakes collidates with an apple, the score will be increased, the
+ * apple vanishes and the length of the snake grows.
  */
 function checkCollisionFood(){
     // Kollision vorhanden? Kopf von Snake mit Apfel
@@ -269,18 +185,20 @@ function checkCollisionFood(){
  * The first 20 pixel of the snake are the head, the rest is the body
  */
 function checkCollisionSnakeBody(){
-    let xHead = snake.snakePosition[0][0];
-    let yHead = snake.snakePosition[0][1];
+    return collisionDetectionRectangles(pixels, snake.snakePosition[0][0],snake.snakePosition[0][1]);
+}
+
+function collisionDetectionRectangles(startIndex, x1,y1){
     let x;
     let y;
     //let distance;
-    for (let index = 20; index < snake.snakePosition.length; index++) {
+    for (let index = startIndex; index < snake.snakePosition.length; index++) {
         x = snake.snakePosition[index][0];
         y = snake.snakePosition[index][1];
-        if(x < xHead + 1){
-            if(x + 1 > xHead){
-                if(y < yHead + 20){
-                    if(y + 20 > yHead){
+        if(x < x1 + 1){
+            if(x + 1 > x1){
+                if(y < y1 + pixels){
+                    if(y + pixels > y1){
                         return true;
                     }
                 }
@@ -290,11 +208,16 @@ function checkCollisionSnakeBody(){
     return false;
 }
 
+/**
+ * Event listeners that reacts when an arrow key is pressed to realize the movement of the snake.
+ */
 document.addEventListener('keydown',function(event){
     snake.move(event);
 });
 
-
+/**
+ * Game Loop.
+ */
 function loop() {
     ctx.clearRect(0, 0, width, height);
     snake.update();
