@@ -5,27 +5,58 @@ const width = canvas.clientWidth;
 const height = canvas.clientHeight;
 
 let foodAvailable = false;
+const pixels = 20;
 
 const apple = {
     x: 0,
     y: 0,
     points: 5,
+    /**
+     * Spawns an apple of an empty field of the map. E.g. it cannot be spawned on a field 
+     * where the snake is.
+     */
     spawnApple(){
-        this.x = Math.random() * 800;//width
-        this.y = Math.random() * 400 ;//height
-        //TODO: nicht dorthin spawnen wo bereits ein Apfel ist
+        let collision = true;
+        while(collision){
+            this.x = Math.random() * 780;//width
+            this.y = Math.random() * 380 ;//height
+            let xSnake;
+            let ySnake;
+            
+            //let distance;
+            for (let index = 0; index < snake.snakePosition.length; index++) {
+                xSnake = snake.snakePosition[index][0];
+                ySnake = snake.snakePosition[index][1];
+                if(this.x < xSnake + 1){
+                    if(this.x + 1 > xSnake){
+                        if(this.y < ySnake + 20){
+                            if(this.y + 20 > ySnake){
+                                collision = true;
+                                return;
+                            } 
+                        }
+                    }
+                
+                }
+                collision = false;
+    
+            }
+        }
     },
+    /**
+     * Draws the apple at the specified position.
+     */
     draw(){
         if(foodAvailable){
             ctx.fillStyle = 'red';
-            ctx.fillRect(this.x, this.y, 20,20);
+            ctx.fillRect(this.x, this.y, pixels, pixels);
         }
     }
 }
 
 function generateSnakePositions(){
     let snakePos = [];
-    for (let index = 0; index < 120; index++) {
+    for (let index = 0; index < 6*pixels; index++) {
         snakePos.push([width/2 + index, height/2]);
     }
     return snakePos;
@@ -35,16 +66,6 @@ const snake = {
     pixel: 20,
     speed: 1,
     snakePosition: generateSnakePositions(),
-    /*
-    snakePosition: [
-        [width/2,height/2],
-        [width/2+20,height/2],
-        [width/2+2*20,height/2],
-        [width/2+3*20,height/2],
-        [width/2+4*20,height/2],
-        [width/2+5*20,height/2],
-    ],
-    */
     score: 0,
     view: 0, //0 west, 1 north, 2 east, 3 south
 
@@ -155,43 +176,6 @@ const snake = {
         }
     },
     */
-    /*
-    update(){
-        for (let i = 0; i < this.snakePosition.length; i++) {
-            switch (this.view) {
-                case 0: //left - west
-                    if(this.snakePosition[i][0] <= 0){
-                        this.snakePosition[i][0] = width;
-                    } else{
-                        this.snakePosition[i][0] = this.snakePosition[i][0] - this.speed;
-                    }
-                    break;
-                case 1: //up - north
-                    if(this.snakePosition[i][1] <= 0){
-                        this.snakePosition[i][1] = height;
-                    } else{
-                        this.snakePosition[i][1] = this.snakePosition[i][1] - this.speed;
-                    }    
-                    break;
-                case 2: //right - east
-                    if(this.snakePosition[i][0] >= width){
-                        this.snakePosition[i][0] = 0;
-                    } else{
-                        this.snakePosition[i][0] = this.snakePosition[i][0] + this.speed;
-                    }
-                    
-                    break;
-                default: //down - south
-                    if(this.snakePosition[i][1] >= height){
-                        this.snakePosition[i][1] = 0;
-                    } else{
-                        this.snakePosition[i][1] = this.snakePosition[i][1] + this.speed;
-                    }  
-                    break;
-            }
-        }
-    },
-    */
     move(event){
         switch (event.keyCode) {
             case 37: //left
@@ -218,7 +202,6 @@ const snake = {
         let lastIndex = this.snakePosition.length -1;
         let lastPosition = this.snakePosition[lastIndex];
         let beforeLastPosition = this.snakePosition[lastIndex-1];
-        //this.snakePosition.push([this.snakePosition[lastIndex][0], this.snakePosition[lastIndex][1]]); //neues Element
         let xDifference = lastPosition[0] - beforeLastPosition[0]; // >0:left   <0:right   ==0:keine Veränderung der x Position; up oder down 
         let yDifference = lastPosition[1] - beforeLastPosition[1]; // >0:up   <0:down   ==0: keine Veränderung der y Position, also right or left
         if(xDifference == 0){ // up or down
@@ -258,26 +241,6 @@ const snake = {
         
     }
 
-    /*
-    move(event){
-        switch (event.keyCode) {
-            case 37: //left
-                this.view = 0;
-                break;
-            case 38: //up
-                this.view = 1;
-                break;
-            case 39: //right
-                this.view = 2;
-                break;
-            case 40: //down
-                this.view = 3;
-                break;
-            default: //do nothing
-                break;
-        }
-    }
-    */
 };
 
 /**
@@ -323,14 +286,6 @@ function checkCollisionSnakeBody(){
                 }
             }
         }
-        /*
-        x = snake.snakePosition[index][0];
-        y = snake.snakePosition[index][1];
-        distance = Math.sqrt(Math.pow(Math.abs(x-xHead),2) + Math.pow(Math.abs(y-yHead),2) );
-        if(distance < 20){
-            return true;
-        }
-        */
     }
     return false;
 }
@@ -348,13 +303,11 @@ function loop() {
         foodAvailable = true;
     }
     checkCollisionFood();
-    //checkCollisionSnakeBody()
     if(checkCollisionSnakeBody()){
         window.cancelAnimationFrame(animationFrameHandle);
         animationFrameHandle = undefined;
         return;
     }
-    //console.log(snake.snakePosition);
     snake.draw(ctx);
     apple.draw();
     window.requestAnimationFrame(loop);
